@@ -3,7 +3,6 @@ import { defineConfig } from "@playwright/test";
 const PORT = 3217;
 
 export default defineConfig({
-  testDir: "tests/e2e",
   outputDir: "tests/.results",
   timeout: 240_000,
   expect: { timeout: 15_000 },
@@ -18,6 +17,12 @@ export default defineConfig({
     hasTouch: true,
     colorScheme: "dark",
   },
+  projects: [
+    // Default suite: /api/plan is mocked with tests/fixtures/plan-warrior-4d.json (no Gemini calls).
+    { name: "e2e", testDir: "tests/e2e" },
+    // Real Gemini, uses free-tier quota: `npm run test:live`.
+    { name: "live", testDir: "tests/live" },
+  ],
   webServer: {
     // Production build (skips the dataset re-download; exercises.slim.json must exist — run `npm run slim` once).
     command: `npx next build && npx next start -p ${PORT}`,

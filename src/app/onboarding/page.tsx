@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { NumberField } from "@/components/NumberField";
 import { OptionCard, OptionGroup } from "@/components/OptionCard";
 import { StepShell } from "@/components/StepShell";
@@ -162,10 +162,24 @@ const STEPS: Step[] = [
 ];
 
 export default function OnboardingPage() {
+  // useSearchParams needs a Suspense boundary so the rest of the page can prerender.
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <OnboardingLoader />
+    </Suspense>
+  );
+}
+
+function OnboardingLoader() {
   const { ready, value } = useStored(KEYS.profile, DraftProfileSchema);
   if (!ready) return <LoadingScreen />;
   return <OnboardingFlow initial={value ?? {}} />;
 }
+
+/** History entries we push carry the 1-based step they came from, so "back" can pop instead of push. */
+type StepHistoryState = { taFrom?: number } | null;
+
+const stepUrl = (index: number) => `?step=${index + 1}`;
 
 function OnboardingFlow({ initial }: { initial: DraftProfile }) {
   const router = useRouter();
@@ -176,12 +190,30 @@ function OnboardingFlow({ initial }: { initial: DraftProfile }) {
     weightKg: initial.weightKg?.toString() ?? "",
     targetWeightKg: initial.targetWeightKg?.toString() ?? "",
   }));
-  const [index, setIndex] = useState(() => {
-    const firstMissing = STEPS.findIndex((s) => initial[s.field] === undefined);
-    return firstMissing === -1 ? 0 : firstMissing;
-  });
-  const [dir, setDir] = useState<1 | -1>(1);
   const [error, setError] = useState<string | null>(null);
+
+  // The step lives in the URL (?step=N, 1-based) so browser/swipe back goes to the previous question.
+  // You can't jump past the first unanswered question; with no ?step we resume there.
+  const searchParams = useSearchParams();
+  const requested = Number(searchParams.get("step"));
+  const requestedValid = Number.isInteger(requested) && requested >= 1 && requested <= STEPS.length;
+  const firstMissing = STEPS.findIndex((s) => answers[s.field] === undefined);
+  const maxIndex = firstMissing === -1 ? STEPS.length - 1 : firstMissing;
+  const index = requestedValid ? Math.min(requested - 1, maxIndex) : firstMissing === -1 ? 0 : firstMissing;
+
+  // Keep the URL honest when it was missing, invalid or skipped ahead.
+  useEffect(() => {
+    if (!requestedValid || requested - 1 !== index) window.history.replaceState(null, "", stepUrl(index));
+  }, [requestedValid, requested, index]);
+
+  // Slide direction + error reset follow the step, whichever way it changed (buttons or browser).
+  const [prevIndex, setPrevIndex] = useState(index);
+  const [dir, setDir] = useState<1 | -1>(1);
+  if (prevIndex !== index) {
+    setPrevIndex(index);
+    setDir(index > prevIndex ? 1 : -1);
+    setError(null);
+  }
 
   const step = STEPS[index];
   const isLast = index === STEPS.length - 1;
@@ -197,8 +229,12 @@ function OnboardingFlow({ initial }: { initial: DraftProfile }) {
       router.push("/");
       return;
     }
-    setDir(-1);
-    setIndex(index - 1);
+    const state = window.history.state as StepHistoryState;
+    if (state?.taFrom === index) {
+      window.history.back(); // previous entry is our previous question
+    } else {
+      window.history.replaceState(null, "", stepUrl(index - 1)); // deep link / fresh tab
+    }
   };
 
   const goNext = () => {
@@ -230,8 +266,7 @@ function OnboardingFlow({ initial }: { initial: DraftProfile }) {
       router.push("/arc");
       return;
     }
-    setDir(1);
-    setIndex(index + 1);
+    window.history.pushState({ taFrom: index + 1 } satisfies StepHistoryState, "", stepUrl(index + 1));
   };
 
   const targetHint = (() => {

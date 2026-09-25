@@ -11,7 +11,9 @@
     "predev": "node scripts/slim-dataset.mjs --if-missing",
     "slim": "node scripts/slim-dataset.mjs",
     "probe": "tsx --conditions=react-server --env-file=.env.local scripts/probe-plan.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=e2e",
+    "test:live": "playwright test --project=live",
+    "fixture": "tsx scripts/make-fixture.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

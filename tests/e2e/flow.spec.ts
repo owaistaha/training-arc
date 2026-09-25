@@ -1,6 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { PlanResponseSchema, ProfileSchema } from "../../src/lib/planSchema";
+import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
+
+const ONBOARDING_URL = /\/onboarding\?step=\d+$/;
 
 const SHOTS = join(__dirname, "..", "screenshots");
 mkdirSync(SHOTS, { recursive: true });
@@ -49,7 +53,22 @@ async function continueTo(page: Page, nextTitle: string | RegExp) {
 
 const onboardingShots: string[] = [];
 
-test("full flow at 375 px: onboarding → arc → reveal → plan → workout", async ({ page, browser, request }) => {
+test("the plan fixture is a valid /api/plan response built from real dataset IDs", () => {
+  const parsed = PlanResponseSchema.parse(PLAN_FIXTURE);
+  const slimPath = join(__dirname, "../../src/data/exercises.slim.json");
+  expect(existsSync(slimPath), "run `npm run slim` first").toBe(true);
+  const dataset = new Map((JSON.parse(readFileSync(slimPath, "utf8")) as { id: string; gif: string }[]).map((e) => [e.id, e]));
+  for (const day of parsed.plan.days) {
+    expect(day.exercises.length).toBeGreaterThanOrEqual(4);
+    for (const { exerciseId } of day.exercises) {
+      expect(dataset.has(exerciseId), `${exerciseId} not in dataset`).toBe(true);
+      expect(parsed.exercises[exerciseId]?.gif).toBe(dataset.get(exerciseId)!.gif);
+    }
+  }
+});
+
+test("full flow at 375 px: onboarding → arc → reveal → plan → workout", async ({ page, context, browser, request }) => {
+  const planRequests = await mockPlanApi(context, { delayMs: 2500 });
   const consoleErrors: string[] = [];
   page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
   page.on("pageerror", (e) => consoleErrors.push(e.message));
@@ -62,7 +81,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
 
   // ---------- Onboarding ----------
   await page.getByRole("link", { name: "Start your arc" }).click();
-  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page).toHaveURL(/\/onboarding\?step=1$/);
   await expect(page.getByRole("heading", { level: 1, name: "Who's starting this arc?" })).toBeVisible();
   await page.getByRole("radio", { name: /Male/ }).first().click();
   await checkScreen(page);
@@ -115,9 +134,38 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await expect(page.getByRole("button", { name: "Choose my arc" })).toBeVisible();
   onboardingShots.push(await shot(page, "onboarding-10-equipment"));
 
-  // Back button works and keeps answers.
+  await expect(page).toHaveURL(/\/onboarding\?step=10$/);
+
+  // In-app back pops history and keeps answers.
   await page.getByRole("button", { name: "Previous question" }).click();
+  await expect(page).toHaveURL(/\?step=9$/);
   await expect(page.getByRole("radio", { name: /^4/ })).toHaveAttribute("aria-checked", "true");
+
+  // Browser back goes to the previous question (not out of onboarding), answers intact.
+  await page.goBack();
+  await expect(page).toHaveURL(/\?step=8$/);
+  await expect(page.getByRole("heading", { level: 1, name: "How long have you trained?" })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Beginner/ })).toHaveAttribute("aria-checked", "true");
+  await page.goBack();
+  await page.goBack();
+  await page.goBack();
+  await expect(page).toHaveURL(/\?step=5$/);
+  await expect(page.locator("#field-targetWeightKg")).toHaveValue("78");
+  await shot(page, "onboarding-browser-back-to-step-5");
+
+  // Browser forward works too.
+  await page.goForward();
+  await expect(page.getByRole("heading", { level: 1, name: "Your shape right now?" })).toBeVisible();
+
+  // Reload keeps the step and restores answers from ta.profile.v1.
+  await page.reload();
+  await expect(page).toHaveURL(/\?step=6$/);
+  await expect(page.getByRole("radio", { name: /Slim/ })).toHaveAttribute("aria-checked", "true");
+
+  // Walk forward again to the end.
+  await continueTo(page, "Which sounds most like you?");
+  await continueTo(page, "How long have you trained?");
+  await continueTo(page, "Days per week you can train?");
   await continueTo(page, "Where will you train?");
   await continueTo(page, "Who do you want to become?");
 
@@ -141,11 +189,14 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await page.waitForTimeout(1300); // count-up finishes
   await expect(page.getByLabel("Daily calorie target")).toContainText("2,928");
   await shot(page, "reveal-building-plan");
-  const planStart = Date.now();
   const seePlan = page.getByRole("button", { name: "See my training plan" });
   await expect(seePlan).toBeEnabled({ timeout: 40_000 });
-  const planMs = Date.now() - planStart;
-  console.log(`Plan ready ~${(planMs / 1000).toFixed(1)} s after the reveal settled`);
+  // The app sent exactly the profile (no extra fields) to /api/plan, once.
+  expect(planRequests).toHaveLength(1);
+  expect(ProfileSchema.parse(planRequests[0])).toEqual({
+    sex: "male", age: 24, heightCm: 178, weightKg: 72, targetWeightKg: 78, bodyShape: "slim",
+    bodyType: "ectomorph", experience: "beginner", daysPerWeek: 4, equipment: "gym", archetype: "warrior",
+  });
   await expect(page.getByText("Not medical advice")).toBeVisible();
   await checkScreen(page);
   await shot(page, "reveal", true);
@@ -158,7 +209,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   const dayCount = await dayLinks.count();
   expect(dayCount).toBe(4);
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("ta.plan.v1") || "null"));
-  console.log(`Plan source: ${stored.source}${stored.fallbackReason ? ` (${stored.fallbackReason})` : ""}`);
+  expect(stored.plan).toEqual(PLAN_FIXTURE.plan);
   await checkScreen(page);
   await shot(page, "plan-week", true);
 
@@ -219,6 +270,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   // ---------- Persistence: close the browser, reopen ----------
   const state = await page.context().storageState();
   const reopened = await browser.newContext({ storageState: state, viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  await mockPlanApi(reopened);
   const page2 = await reopened.newPage();
   await page2.goto("/plan");
   await expect(page2.getByRole("heading", { level: 1, name: /Warrior Arc/ })).toBeVisible();
@@ -240,7 +292,8 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await sheet.close();
 });
 
-test("missing or corrupt storage sends the user to onboarding without crashing", async ({ page }) => {
+test("missing or corrupt storage sends the user to onboarding without crashing", async ({ page, context }) => {
+  await mockPlanApi(context);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
 
@@ -251,7 +304,7 @@ test("missing or corrupt storage sends the user to onboarding without crashing",
   });
   for (const path of ["/plan", "/plan/1", "/reveal", "/arc"]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\/onboarding$/);
+    await expect(page).toHaveURL(ONBOARDING_URL);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   }
   // Corrupt draft is ignored: onboarding starts fresh at step 1.
@@ -259,11 +312,17 @@ test("missing or corrupt storage sends the user to onboarding without crashing",
 
   await page.evaluate(() => localStorage.clear());
   await page.goto("/plan/3");
-  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page).toHaveURL(/\/onboarding\?step=1$/);
+
+  // Deep-linking past unanswered questions is clamped to the first unanswered one.
+  await page.evaluate(() => localStorage.setItem("ta.profile.v1", JSON.stringify({ sex: "female", age: 30 })));
+  await page.goto("/onboarding?step=9");
+  await expect(page).toHaveURL(/\/onboarding\?step=3$/);
+  await expect(page.getByRole("heading", { level: 1, name: "How tall are you?" })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-test("network failure on /reveal shows a retry, never an endless spinner", async ({ page }) => {
+test("network failure on /reveal shows a retry, never an endless spinner", async ({ page, context }) => {
   await page.goto("/");
   await page.evaluate(() =>
     localStorage.setItem(
@@ -280,6 +339,7 @@ test("network failure on /reveal shows a retry, never an endless spinner", async
   await page.screenshot({ path: join(SHOTS, "90-reveal-network-error.png") });
 
   await page.unroute("**/api/plan");
+  await mockPlanApi(context);
   await retry.click();
   await expect(page.getByRole("button", { name: "See my training plan" })).toBeEnabled({ timeout: 40_000 });
 });

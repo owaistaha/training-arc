@@ -126,15 +126,31 @@ resize the media (which breaks the 180×180 term) and use up Vercel's
             "note": "Main lift — add weight when you hit 10 reps on all sets" }
         ] }
     ]
+  },
+  "exercises": {
+    "0025": {
+      "name": "barbell bench press", "target": "pectorals",
+      "equipment": "barbell", "secondary": ["triceps", "shoulders"],
+      "steps": ["Lie flat on a bench with your feet flat on the ground…", "…"],
+      "gif": "videos/0025-EIeI8Vf.gif"
+    }
   }
 }
 ```
+- `exercises` has one entry per `exerciseId` used anywhere in `plan`, with
+  English steps and the relative GIF path (the client builds the pinned raw
+  URL). This means the browser never loads the full dataset.
+- `stats` also includes `targetBmi` and `warnings` (strings, for the BMI
+  < 18.5 / > 30 warning).
+- When `source` is `"template"`, a `fallbackReason` is added:
+  `rate_limited_upstream`, `rate_limited_local`, `timeout`,
+  `invalid_output`, `upstream_error` or `not_configured`.
 
 ## Data model (localStorage)
 | key | shape |
 |---|---|
-| `ta.profile.v1` | request object above |
-| `ta.plan.v1` | response object above + `createdAt` |
+| `ta.profile.v1` | request object above (partial while onboarding is in progress; `archetype` is added on `/arc`) |
+| `ta.plan.v1` | response object above + `createdAt` + `profileKey` (a plan is regenerated when the profile changes) |
 | `ta.log.v1` | `{ [isoDate]: { [dayIndex]: { [exerciseId]: boolean[] } } }` (ticked sets) |
 
 ## Archetype art
@@ -142,7 +158,7 @@ resize the media (which breaks the 180×180 term) and use up Vercel's
   blocked on art.
 - Final art: original anime-style illustrations, generated or drawn
   from **generic descriptions only** (e.g. "original anime-style
-  martial artist, spiky black hair, orange-and-blue gi, lean V-taper
+  martial artist, short dark hair, plain grey training wear, lean V-taper
   physique"). Prompts must never contain a franchise or character name.
   The output also must not recreate a known character's signature
   outfit, hair and color combination. The art gets checked by eye
