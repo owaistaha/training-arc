@@ -20,7 +20,7 @@ interface Build {
 
 const BUILDS: Record<ArchetypeId, Build> = {
   warrior: { s: 46, w: 22, h: 26, a: 13, l: 17, head: 14, neck: 16, hair: true },
-  rival: { s: 44, w: 28, h: 29, a: 16, l: 19, head: 14, neck: 20, hair: true },
+  vanguard: { s: 44, w: 28, h: 29, a: 16, l: 19, head: 14, neck: 20, hair: true },
   ninja: { s: 36, w: 21, h: 24, a: 10, l: 14, head: 13.5, neck: 12, hair: true, prop: "headband" },
   titan: { s: 56, w: 36, h: 37, a: 21, l: 25, head: 15, neck: 26, hair: true },
   swordsman: { s: 41, w: 24, h: 27, a: 12, l: 16, head: 14, neck: 14, hair: true, prop: "blade" },

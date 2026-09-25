@@ -60,14 +60,26 @@ export function PinnedFooter({ children }: { children: ReactNode }) {
   );
 }
 
-export function Chip({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "accent" | "electric" }) {
+export function Chip({
+  children,
+  tone = "default",
+  small,
+}: {
+  children: ReactNode;
+  tone?: "default" | "accent" | "electric";
+  small?: boolean;
+}) {
   const tones = {
     default: "border-line bg-raised text-muted",
     accent: "border-accent/40 bg-accent/10 text-gold",
     electric: "border-electric/40 bg-electric/10 text-fg",
   };
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-1 text-xs font-medium ${tones[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border font-medium ${
+        small ? "px-2 py-0.5 text-[11px]" : "px-2 py-1 text-xs"
+      } ${tones[tone]}`}
+    >
       {children}
     </span>
   );

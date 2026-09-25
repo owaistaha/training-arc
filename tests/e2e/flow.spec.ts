@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { PlanResponseSchema, ProfileSchema } from "../../src/lib/planSchema";
 import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
@@ -7,6 +7,7 @@ import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
 const ONBOARDING_URL = /\/onboarding\?step=\d+$/;
 
 const SHOTS = join(__dirname, "..", "screenshots");
+rmSync(SHOTS, { recursive: true, force: true }); // no stale shots from earlier runs
 mkdirSync(SHOTS, { recursive: true });
 
 let shotNo = 0;
@@ -44,6 +45,19 @@ async function expectTapTargets(page: Page) {
 async function checkScreen(page: Page) {
   await expectNoHorizontalScroll(page);
   await expectTapTargets(page);
+}
+
+/** Arc picker: card art is 3:4 at ~300×400, and the whole card sits above the pinned CTA without scrolling. */
+async function expectArcFitsAboveCta(page: Page) {
+  const card = await page.locator("[data-archetype]").first().boundingBox();
+  const art = await page.locator("[data-archetype] > div").first().boundingBox();
+  const cta = await page.getByRole("button", { name: /This is my goal|Tap an archetype/ }).boundingBox();
+  // ~300×400 (the card's 1 px border sits inside its 300 px width) and exactly 3:4.
+  expect(art!.width).toBeGreaterThanOrEqual(296);
+  expect(art!.width).toBeLessThanOrEqual(300);
+  expect(Math.abs(art!.height - (art!.width * 4) / 3)).toBeLessThanOrEqual(1);
+  // 16 px clearance for the footer's fade-out gradient.
+  expect(card!.y + card!.height, "card is covered by the CTA").toBeLessThanOrEqual(cta!.y - 16);
 }
 
 async function continueTo(page: Page, nextTitle: string | RegExp) {
@@ -167,12 +181,13 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await continueTo(page, "How long have you trained?");
   await continueTo(page, "Days per week you can train?");
   await continueTo(page, "Where will you train?");
-  await continueTo(page, "Who do you want to become?");
+  await continueTo(page, "Pick your arc");
 
   // ---------- Arc picker ----------
   await expect(page).toHaveURL(/\/arc$/);
   await expect(page.getByRole("button", { name: "Tap an archetype" })).toBeDisabled();
   await checkScreen(page);
+  await expectArcFitsAboveCta(page);
   await shot(page, "arc-picker");
   await page.getByRole("radio", { name: /The Titan/ }).scrollIntoViewIfNeeded();
   await shot(page, "arc-picker-swiped");
@@ -180,6 +195,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await warrior.scrollIntoViewIfNeeded();
   await warrior.click();
   await expect(warrior).toHaveAttribute("aria-checked", "true");
+  await expectArcFitsAboveCta(page);
   await shot(page, "arc-picker-selected");
   await page.getByRole("button", { name: /This is my goal/ }).click();
 

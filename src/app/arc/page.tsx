@@ -17,7 +17,7 @@ export default function ArcPage() {
 }
 
 function noteFor(a: Archetype, profile: OnboardedProfile): string | undefined {
-  if (a.equipment === "gym" && profile.equipment === "home") return "Built for the gym. At home we'll adapt it to dumbbells and bodyweight.";
+  if (a.equipment === "gym" && profile.equipment === "home") return "Built for the gym. We'll adapt it for home.";
   if (a.equipment === "bodyweight") return "Bodyweight only, wherever you train.";
   return undefined;
 }
@@ -57,13 +57,13 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
 
   return (
     <div className="min-h-dvh pb-36">
-      <Screen className="flex h-14 items-center pt-[env(safe-area-inset-top)]">
+      <Screen className="flex h-12 items-center pt-[env(safe-area-inset-top)]">
         <BackButton href="/onboarding" label="Back to questions" />
       </Screen>
-      <Screen className="pt-2">
+      <Screen>
         <Kicker>Choose your arc</Kicker>
-        <h1 className="mt-2 font-display text-[2.75rem] leading-[0.95] tracking-wide">Who do you want to become?</h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted">Swipe through six original archetypes and tap the physique you&apos;re chasing.</p>
+        <h1 className="mt-1 font-display text-[2.75rem] leading-[0.95] tracking-wide">Pick your arc</h1>
+        <p className="mt-1.5 text-[15px] leading-snug text-muted">Swipe the six archetypes. Tap your goal.</p>
       </Screen>
 
       <div
@@ -71,7 +71,7 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         onScroll={onScroll}
         role="radiogroup"
         aria-label="Physique archetypes"
-        className="scrollbar-none mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[max(1.25rem,calc((100vw-310px)/2))] pb-4 pt-2 md:px-[calc((100vw-310px)/2)]"
+        className="scrollbar-none mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[max(1.25rem,calc((100vw-300px)/2))] pb-4 pt-2 md:px-[calc((100vw-300px)/2)]"
       >
         {ARCHETYPES.map((a, i) => (
           <ArchetypeCard

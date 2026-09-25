@@ -17,7 +17,7 @@ import { buildTemplatePlan } from "@/lib/templatePlan";
 const PROFILES: Profile[] = [
   // 1. The TECH_SPEC example (also used to check the stats maths below)
   { sex: "male", age: 24, heightCm: 178, weightKg: 72, targetWeightKg: 78, bodyShape: "slim", bodyType: "ectomorph", experience: "beginner", daysPerWeek: 4, equipment: "gym", archetype: "warrior" },
-  { sex: "male", age: 31, heightCm: 175, weightKg: 80, targetWeightKg: 80, bodyShape: "athletic", bodyType: "mesomorph", experience: "intermediate", daysPerWeek: 3, equipment: "gym", archetype: "rival" },
+  { sex: "male", age: 31, heightCm: 175, weightKg: 80, targetWeightKg: 80, bodyShape: "athletic", bodyType: "mesomorph", experience: "intermediate", daysPerWeek: 3, equipment: "gym", archetype: "vanguard" },
   { sex: "female", age: 29, heightCm: 165, weightKg: 70, targetWeightKg: 62, bodyShape: "average", bodyType: "endomorph", experience: "intermediate", daysPerWeek: 5, equipment: "home", archetype: "ninja" },
   { sex: "male", age: 22, heightCm: 183, weightKg: 68, targetWeightKg: 80, bodyShape: "slim", bodyType: "ectomorph", experience: "advanced", daysPerWeek: 6, equipment: "gym", archetype: "titan" },
   { sex: "female", age: 36, heightCm: 170, weightKg: 64, targetWeightKg: 65, bodyShape: "average", bodyType: "mesomorph", experience: "beginner", daysPerWeek: 2, equipment: "home", archetype: "swordsman" },
@@ -25,7 +25,7 @@ const PROFILES: Profile[] = [
   { sex: "male", age: 40, heightCm: 180, weightKg: 90, targetWeightKg: 80, bodyShape: "heavy", bodyType: "mesomorph", experience: "advanced", daysPerWeek: 6, equipment: "home", archetype: "warrior" },
   { sex: "female", age: 21, heightCm: 160, weightKg: 60, targetWeightKg: 61, bodyShape: "slim", bodyType: "ectomorph", experience: "intermediate", daysPerWeek: 3, equipment: "gym", archetype: "ninja" },
   { sex: "male", age: 26, heightCm: 176, weightKg: 70, targetWeightKg: 76, bodyShape: "average", bodyType: "mesomorph", experience: "intermediate", daysPerWeek: 5, equipment: "home", archetype: "titan" },
-  { sex: "male", age: 33, heightCm: 180, weightKg: 70, targetWeightKg: 76, bodyShape: "slim", bodyType: "ectomorph", experience: "advanced", daysPerWeek: 5, equipment: "home", archetype: "rival" },
+  { sex: "male", age: 33, heightCm: 180, weightKg: 70, targetWeightKg: 76, bodyShape: "slim", bodyType: "ectomorph", experience: "advanced", daysPerWeek: 5, equipment: "home", archetype: "vanguard" },
 ];
 
 const DELAY_MS = Number(process.env.PROBE_DELAY_MS ?? 4000);

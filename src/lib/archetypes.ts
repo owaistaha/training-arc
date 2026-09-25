@@ -1,6 +1,6 @@
 import archetypesJson from "@/data/archetypes.json";
 
-export const ARCHETYPE_IDS = ["warrior", "rival", "ninja", "titan", "swordsman", "monk"] as const;
+export const ARCHETYPE_IDS = ["warrior", "vanguard", "ninja", "titan", "swordsman", "monk"] as const;
 export type ArchetypeId = (typeof ARCHETYPE_IDS)[number];
 
 export type Split = "push-pull-legs" | "upper-lower" | "full-body" | "full-body-plus-conditioning";

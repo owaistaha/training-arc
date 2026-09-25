@@ -36,7 +36,7 @@ numbers.
 | id | Name | Look | Training bias |
 |---|---|---|---|
 | `warrior` | The Warrior | Lean V-taper, big shoulders and back | PPL, 6–12 reps, lean bulk / recomp |
-| `rival` | The Rival Prince | Compact, dense, hard-looking | Strength-focused upper/lower, 4–8 reps |
+| `vanguard` | The Vanguard | Compact, dense, hard-looking | Strength-focused upper/lower, 4–8 reps |
 | `ninja` | The Shadow Ninja | Shredded, agile, visible abs | Full body + conditioning, cut |
 | `titan` | The Titan | Maximum size | Hypertrophy PPL, 8–15 reps, bulk |
 | `swordsman` | The Swordsman | Athletic, strong core and back | Full body compounds + core |

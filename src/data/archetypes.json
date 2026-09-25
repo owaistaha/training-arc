@@ -12,11 +12,11 @@
     "equipment": "any"
   },
   {
-    "id": "rival",
-    "name": "The Rival Prince",
+    "id": "vanguard",
+    "name": "The Vanguard",
     "tagline": "Pride is earned under the bar.",
     "look": "Compact, dense, hard-looking muscle, thick arms and traps",
-    "artBrief": "Original anime-style proud fighter, compact dense muscular build, arms crossed, confident smirk, dark armored training suit, dramatic lighting",
+    "artBrief": "Original anime-style strength athlete, compact dense muscular build, chalked hands gripping a loaded barbell, calm focused expression, plain dark training wear, dramatic lighting",
     "split": "upper-lower",
     "repRange": "4-8",
     "defaultDirection": "recomp",
