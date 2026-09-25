@@ -13,7 +13,8 @@
     "probe": "tsx --conditions=react-server --env-file=.env.local scripts/probe-plan.ts",
     "test:e2e": "playwright test --project=e2e",
     "test:live": "playwright test --project=live",
-    "fixture": "tsx scripts/make-fixture.ts"
+    "fixture": "tsx scripts/make-fixture.ts",
+    "art": "node scripts/convert-art.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
@@ -32,6 +33,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
