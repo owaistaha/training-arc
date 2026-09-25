@@ -1,0 +1,74 @@
+[
+  {
+    "id": "warrior",
+    "name": "The Warrior",
+    "tagline": "Break your limits. Every session.",
+    "look": "Lean V-taper, broad shoulders, wide back, visible abs",
+    "artBrief": "Original anime-style martial artist, athletic V-taper build, simple training outfit, determined expression, dynamic pose, bold cel shading",
+    "split": "push-pull-legs",
+    "repRange": "6-12",
+    "defaultDirection": "lean_bulk",
+    "emphasis": ["shoulders", "back", "chest"],
+    "equipment": "any"
+  },
+  {
+    "id": "rival",
+    "name": "The Rival Prince",
+    "tagline": "Pride is earned under the bar.",
+    "look": "Compact, dense, hard-looking muscle, thick arms and traps",
+    "artBrief": "Original anime-style proud fighter, compact dense muscular build, arms crossed, confident smirk, dark armored training suit, dramatic lighting",
+    "split": "upper-lower",
+    "repRange": "4-8",
+    "defaultDirection": "recomp",
+    "emphasis": ["chest", "upper arms", "back"],
+    "equipment": "any"
+  },
+  {
+    "id": "ninja",
+    "name": "The Shadow Ninja",
+    "tagline": "Fast. Light. Unseen.",
+    "look": "Shredded and agile, low body fat, defined abs",
+    "artBrief": "Original anime-style stealth fighter, lean shredded agile build, dark wraps and scarf, mid-leap pose, moonlit background",
+    "split": "full-body-plus-conditioning",
+    "repRange": "10-15",
+    "defaultDirection": "cut",
+    "emphasis": ["waist", "upper legs", "cardio"],
+    "equipment": "any"
+  },
+  {
+    "id": "titan",
+    "name": "The Titan",
+    "tagline": "Take up space.",
+    "look": "Maximum size, thick everywhere",
+    "artBrief": "Original anime-style giant brawler, massive heavily muscled build, towering pose, cracked ground, heroic low angle",
+    "split": "push-pull-legs",
+    "repRange": "8-15",
+    "defaultDirection": "bulk",
+    "emphasis": ["chest", "upper legs", "back", "upper arms"],
+    "equipment": "gym"
+  },
+  {
+    "id": "swordsman",
+    "name": "The Swordsman",
+    "tagline": "A strong core carries the blade.",
+    "look": "Athletic, powerful back and core, functional strength",
+    "artBrief": "Original anime-style wandering swordsman, athletic strong build, simple robe open at chest, sheathed blade, calm focused stance",
+    "split": "full-body",
+    "repRange": "6-12",
+    "defaultDirection": "recomp",
+    "emphasis": ["back", "waist", "upper legs"],
+    "equipment": "any"
+  },
+  {
+    "id": "monk",
+    "name": "The Monk",
+    "tagline": "Your body is the only equipment.",
+    "look": "Lean calisthenics physique, strong and flexible",
+    "artBrief": "Original anime-style mountain monk, lean calisthenics build, holding a handstand on a rock, simple training pants, misty peaks",
+    "split": "full-body",
+    "repRange": "8-15",
+    "defaultDirection": "recomp",
+    "emphasis": ["chest", "back", "waist"],
+    "equipment": "bodyweight"
+  }
+]
