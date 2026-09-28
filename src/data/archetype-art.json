@@ -1,0 +1,17 @@
+{
+  "titan": {
+    "src": "/archetypes/titan.webp?v=ffc16538",
+    "width": 768,
+    "height": 1024
+  },
+  "swordsman": {
+    "src": "/archetypes/swordsman.webp?v=56bf3883",
+    "width": 768,
+    "height": 1024
+  },
+  "monk": {
+    "src": "/archetypes/monk.webp?v=9633c190",
+    "width": 768,
+    "height": 1024
+  }
+}

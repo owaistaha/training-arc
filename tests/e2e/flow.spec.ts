@@ -3,6 +3,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { PlanResponseSchema, ProfileSchema } from "../../src/lib/planSchema";
 import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
+import ART_MANIFEST from "../../src/data/archetype-art.json";
+import ARCHETYPES from "../../src/data/archetypes.json";
 
 const ONBOARDING_URL = /\/onboarding\?step=\d+$/;
 
@@ -58,6 +60,27 @@ async function expectArcFitsAboveCta(page: Page) {
   expect(Math.abs(art!.height - (art!.width * 4) / 3)).toBeLessThanOrEqual(1);
   // 16 px clearance for the footer's fade-out gradient.
   expect(card!.y + card!.height, "card is covered by the CTA").toBeLessThanOrEqual(cta!.y - 16);
+}
+
+/** Every card shows its WebP art if the manifest lists it (loaded, 768×1024, alt from archetypes.json), else the silhouette. */
+async function expectArchetypeArt(page: Page) {
+  const manifest = ART_MANIFEST as Record<string, { src: string }>;
+  for (const a of ARCHETYPES) {
+    const card = page.locator(`[data-archetype="${a.id}"]`);
+    await card.scrollIntoViewIfNeeded();
+    if (manifest[a.id]) {
+      const img = card.locator("img");
+      await expect(img).toHaveAttribute("alt", a.artAlt);
+      await expect(img).toHaveAttribute("width", "768");
+      await expect(img).toHaveAttribute("height", "1024");
+      await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth), { timeout: 10_000 }).toBe(768);
+      await expect(card.locator('svg[aria-label="Placeholder silhouette"]')).toHaveCount(0);
+    } else {
+      await expect(card.locator("img")).toHaveCount(0);
+      await expect(card.locator('svg[aria-label="Placeholder silhouette"]')).toHaveCount(1);
+    }
+  }
+  await page.locator(`[data-archetype="${ARCHETYPES[0].id}"]`).scrollIntoViewIfNeeded();
 }
 
 async function continueTo(page: Page, nextTitle: string | RegExp) {
@@ -188,6 +211,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await expect(page.getByRole("button", { name: "Tap an archetype" })).toBeDisabled();
   await checkScreen(page);
   await expectArcFitsAboveCta(page);
+  await expectArchetypeArt(page);
   await shot(page, "arc-picker");
   await page.getByRole("radio", { name: /The Titan/ }).scrollIntoViewIfNeeded();
   await shot(page, "arc-picker-swiped");
@@ -336,6 +360,25 @@ test("missing or corrupt storage sends the user to onboarding without crashing",
   await expect(page).toHaveURL(/\/onboarding\?step=3$/);
   await expect(page.getByRole("heading", { level: 1, name: "How tall are you?" })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("archetype art that fails to load falls back to the silhouette", async ({ page, context }) => {
+  await mockPlanApi(context);
+  const withArt = Object.keys(ART_MANIFEST)[0];
+  test.skip(!withArt, "no converted art yet");
+  await page.route(`**/archetypes/${withArt}.webp*`, (route) => route.fulfill({ status: 404, body: "" }));
+  await page.goto("/");
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "ta.profile.v1",
+      JSON.stringify({ sex: "male", age: 24, heightCm: 178, weightKg: 72, targetWeightKg: 78, bodyShape: "slim", bodyType: "ectomorph", experience: "beginner", daysPerWeek: 4, equipment: "gym" }),
+    ),
+  );
+  await page.goto("/arc");
+  const card = page.locator(`[data-archetype="${withArt}"]`);
+  await card.scrollIntoViewIfNeeded();
+  await expect(card.locator('svg[aria-label="Placeholder silhouette"]')).toHaveCount(1);
+  await expect(card.locator("img")).toHaveCount(0);
 });
 
 test("network failure on /reveal shows a retry, never an endless spinner", async ({ page, context }) => {

@@ -14,6 +14,10 @@
 //      with #0A0A0F, so heads and feet are never cut off.
 //   4. Resize to 768×1024, feather the edges into #0A0A0F so they vanish on
 //      the dark UI, export WebP.
+//   5. Rewrite src/data/archetype-art.json from whatever is in
+//      public/archetypes/ (src with a content hash, width, height). The cards
+//      only request art listed there, so a missing image never 404s; the
+//      SVG silhouette shows instead. (Skipped when --out is not the default.)
 //
 // Usage:
 //   npm run art                              all six archetypes
@@ -35,7 +39,8 @@
 //   --feather=PX        edge fade into #0A0A0F, 0 = off   [16]
 //   --quality=Q         WebP quality                      [82]
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -178,8 +183,18 @@ async function cornerDeviation(file) {
 }
 
 // ---------- main ----------
+/** Case-insensitive lookup (e.g. "Swordsman.jpeg" matches "swordsman"), so it works on Linux too. */
+function findSource(id) {
+  const byLower = new Map(readdirSync(settings.inDir).map((f) => [f.toLowerCase(), f]));
+  for (const e of EXTS) {
+    const hit = byLower.get(id + e);
+    if (hit) return join(settings.inDir, hit);
+  }
+  return null;
+}
+
 async function convert(id) {
-  const src = EXTS.map((e) => join(settings.inDir, id + e)).find(existsSync);
+  const src = findSource(id);
   if (!src) return { id, status: "missing" };
 
   // 1. EXIF-orient + flatten transparency onto the app background.
@@ -261,11 +276,27 @@ async function convert(id) {
   return { id, status: "ok", src: srcSize, out: `${meta.width}×${meta.height}`, kb, wm, notes };
 }
 
+const DEFAULT_OUT = resolve(ROOT, "public/archetypes");
+const MANIFEST = resolve(ROOT, "src/data/archetype-art.json");
+
+async function writeManifest() {
+  const manifest = {};
+  for (const id of archetypeIds) {
+    const file = join(DEFAULT_OUT, `${id}.webp`);
+    if (!existsSync(file)) continue;
+    const hash = createHash("sha1").update(readFileSync(file)).digest("hex").slice(0, 8);
+    const { width, height } = await sharp(file).metadata();
+    manifest[id] = { src: `/archetypes/${id}.webp?v=${hash}`, width, height };
+  }
+  writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
+  return Object.keys(manifest);
+}
+
 async function main() {
   if (!existsSync(settings.inDir)) fail(`no input folder at ${settings.inDir}. Save the images as art-raw/<id>.png first.`);
 
-  const known = new Set(ids.flatMap((id) => EXTS.map((e) => id + e)));
-  const strays = readdirSync(settings.inDir).filter((f) => EXTS.includes(extname(f).toLowerCase()) && !known.has(f));
+  const known = new Set(archetypeIds.flatMap((id) => EXTS.map((e) => id + e)));
+  const strays = readdirSync(settings.inDir).filter((f) => EXTS.includes(extname(f).toLowerCase()) && !known.has(f.toLowerCase()));
   if (strays.length && !requestedIds.length) console.warn(`[convert-art] ignoring unrecognised files: ${strays.join(", ")}`);
 
   console.log(
@@ -289,6 +320,10 @@ async function main() {
   }
   if (missing.length) console.log(`  – not found in ${settings.inDir}: ${missing.join(", ")}`);
   console.log(`[convert-art] ${converted} converted → ${settings.outDir}`);
+  if (settings.outDir === DEFAULT_OUT) {
+    const listed = await writeManifest();
+    console.log(`[convert-art] manifest src/data/archetype-art.json lists: ${listed.join(", ") || "(none)"}`);
+  }
 }
 
 main().catch((e) => fail(e.stack || String(e)));

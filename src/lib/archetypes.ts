@@ -1,3 +1,4 @@
+import archetypeArtJson from "@/data/archetype-art.json";
 import archetypesJson from "@/data/archetypes.json";
 
 export const ARCHETYPE_IDS = ["warrior", "vanguard", "ninja", "titan", "swordsman", "monk"] as const;
@@ -12,6 +13,8 @@ export interface Archetype {
   tagline: string;
   look: string;
   artBrief: string;
+  /** Alt text for the archetype art (public/archetypes/<id>.webp). */
+  artAlt: string;
   split: Split;
   repRange: string;
   defaultDirection: DefaultDirection;
@@ -20,6 +23,14 @@ export interface Archetype {
 }
 
 export const ARCHETYPES = archetypesJson as Archetype[];
+
+/** Converted art that exists in public/archetypes/ (written by `npm run art`). */
+export interface ArchetypeArt {
+  src: string;
+  width: number;
+  height: number;
+}
+export const ARCHETYPE_ART = archetypeArtJson as Partial<Record<ArchetypeId, ArchetypeArt>>;
 
 export function getArchetype(id: ArchetypeId): Archetype {
   const a = ARCHETYPES.find((x) => x.id === id);
