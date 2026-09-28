@@ -48,7 +48,7 @@ function Workout({ plan, dayIndex, log }: { plan: StoredPlan; dayIndex: number; 
   return (
     <div className="min-h-dvh pb-16">
       <header className="sticky top-0 z-10 border-b border-line/60 bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur">
-        <Screen className="flex h-14 items-center gap-3">
+        <Screen wide className="flex h-14 items-center gap-3">
           <BackButton href="/plan" label="Back to week" />
           <ProgressBar value={doneSets / totalSets} label="Sets completed today" className="flex-1" />
           <span className="text-sm tabular-nums text-muted" aria-hidden>
@@ -57,23 +57,23 @@ function Workout({ plan, dayIndex, log }: { plan: StoredPlan; dayIndex: number; 
         </Screen>
       </header>
 
-      <Screen className="pt-5">
+      <Screen wide className="pt-5 lg:pt-8">
         <Kicker>
           Day {dayIndex + 1} of {total}
         </Kicker>
-        <h1 className="mt-1 font-display text-[2.75rem] leading-[0.95] tracking-wide">{day.name}</h1>
+        <h1 className="mt-1 font-display text-[2.75rem] leading-[0.95] tracking-wide lg:text-6xl">{day.name}</h1>
         <p className="mt-1 text-[15px] capitalize text-muted">{day.focus}</p>
         <p className="mt-1 text-xs text-muted">
           {day.exercises.length} exercises · {totalSets} sets · ~{estimateMinutes(day.exercises)} min
         </p>
 
         {complete && (
-          <p className="mt-4 flex items-center gap-2 rounded-card border border-electric/50 bg-electric/10 px-4 py-3 text-sm font-medium text-fg" role="status">
+          <p className="mt-4 flex items-center gap-2 rounded-card border border-electric/50 bg-electric/10 px-4 py-3 text-sm font-medium text-fg lg:max-w-md" role="status">
             <Check className="size-5 text-electric" /> Day complete. Refuel and rest up.
           </p>
         )}
 
-        <div className="mt-5 flex flex-col gap-4">
+        <div className="mt-5 flex flex-col gap-4 lg:mt-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-5">
           {day.exercises.map((ex, i) => (
             <ExerciseCard
               key={`${ex.exerciseId}-${i}`}
@@ -87,7 +87,7 @@ function Workout({ plan, dayIndex, log }: { plan: StoredPlan; dayIndex: number; 
           ))}
         </div>
 
-        <nav className="mt-8 grid grid-cols-2 gap-3" aria-label="Other days">
+        <nav className="mt-8 grid grid-cols-2 gap-3 lg:mx-auto lg:max-w-xl" aria-label="Other days">
           {dayIndex > 0 ? (
             <ButtonLink href={`/plan/${dayIndex}`} variant="secondary" className="h-12">
               ← Day {dayIndex}

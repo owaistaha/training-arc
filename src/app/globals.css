@@ -60,6 +60,21 @@ body {
     0 0 24px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 
+/*
+ * Soft fade on all four edges so a character image's background rectangle melts
+ * into the page (the art backgrounds are a touch lighter than --color-bg).
+ */
+@utility art-fade {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, black 20%, black 80%, transparent),
+    linear-gradient(to bottom, transparent, black 12%, black 80%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, black 20%, black 80%, transparent),
+    linear-gradient(to bottom, transparent, black 12%, black 80%, transparent);
+  mask-composite: intersect;
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {

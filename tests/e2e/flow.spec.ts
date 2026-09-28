@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PlanResponseSchema, ProfileSchema } from "../../src/lib/planSchema";
 import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
@@ -9,8 +9,7 @@ import ARCHETYPES from "../../src/data/archetypes.json";
 const ONBOARDING_URL = /\/onboarding\?step=\d+$/;
 
 const SHOTS = join(__dirname, "..", "screenshots");
-rmSync(SHOTS, { recursive: true, force: true }); // no stale shots from earlier runs
-mkdirSync(SHOTS, { recursive: true });
+mkdirSync(SHOTS, { recursive: true }); // emptied once per run by tests/global-setup.ts
 
 let shotNo = 0;
 async function shot(page: Page, name: string, fullPage = false) {

@@ -28,7 +28,7 @@ export function ArchetypeCard({ archetype: a, index, selected, onSelect, note }:
       aria-label={`${a.name}: ${a.tagline}`}
       onClick={onSelect}
       data-archetype={a.id}
-      className={`relative flex w-[80vw] max-w-[300px] shrink-0 snap-center flex-col overflow-hidden rounded-card border text-left transition-[border-color,box-shadow] duration-200 ${
+      className={`relative flex w-[80vw] max-w-[300px] shrink-0 snap-center flex-col lg:w-full overflow-hidden rounded-card border text-left transition-[border-color,box-shadow] duration-200 ${
         selected ? "glow-selected border-transparent" : "border-line"
       }`}
     >

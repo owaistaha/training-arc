@@ -44,16 +44,47 @@ export function ButtonLink({
   );
 }
 
-/** Page container: mobile-first, 375 px base, centred on wider screens. */
-export function Screen({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-md px-5 ${className}`}>{children}</div>;
+/**
+ * Page container: mobile-first, 375 px base, centred on wider screens.
+ * `wide` keeps the phone column below `lg` and opens up to a desktop width from `lg` (1024 px).
+ */
+export function Screen({ children, className = "", wide = false }: { children: ReactNode; className?: string; wide?: boolean }) {
+  return <div className={`mx-auto w-full max-w-md px-5 ${wide ? "lg:max-w-6xl lg:px-10" : ""} ${className}`}>{children}</div>;
 }
 
-/** CTA pinned to the bottom of the viewport, above the safe area. */
-export function PinnedFooter({ children }: { children: ReactNode }) {
+/**
+ * CTA pinned to the bottom of the viewport, above the safe area (phones and tablets).
+ * From `lg` up:
+ *  - `desktop="pinned"` (default): stays pinned, same as on phones.
+ *  - `desktop="inline"`: becomes a normal block right where it sits in the page (under the content).
+ *    Render it outside any transformed ancestor so `fixed` still means the viewport on phones.
+ *  - `desktop="bar"`: a solid bottom bar with a top border, content laid out in a row.
+ */
+export function PinnedFooter({
+  children,
+  desktop = "pinned",
+  className = "",
+}: {
+  children: ReactNode;
+  desktop?: "pinned" | "inline" | "bar";
+  className?: string;
+}) {
+  const outer = {
+    pinned: "",
+    inline: "lg:pointer-events-auto lg:static lg:z-auto lg:bg-none lg:pt-0",
+    bar: "lg:border-t lg:border-line lg:bg-none lg:bg-bg/90 lg:pt-4 lg:backdrop-blur",
+  }[desktop];
+  const inner = {
+    pinned: "",
+    inline: "lg:pb-0", // keeps the phone column (max-w-md, px-5); pass className to realign
+    bar: "lg:max-w-5xl lg:px-10",
+  }[desktop];
   return (
-    <div data-pinned-footer className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg from-60% to-transparent pt-8">
-      <div className="pointer-events-auto mx-auto w-full max-w-md px-5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div
+      data-pinned-footer
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg from-60% to-transparent pt-8 ${outer}`}
+    >
+      <div className={`pointer-events-auto mx-auto w-full max-w-md px-5 pb-[max(1rem,env(safe-area-inset-bottom))] ${inner} ${className}`}>
         {children}
       </div>
     </div>

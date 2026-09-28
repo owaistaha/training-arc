@@ -39,7 +39,8 @@ export function StepShell({ step, total, kicker, title, subtitle, direction, onB
         </Screen>
       </header>
 
-      <main className="flex-1 overflow-x-clip pb-36">
+      {/* Desktop: the question sits a little down the page and the CTA follows right under the answers. */}
+      <main className="flex-1 overflow-x-clip pb-36 lg:pb-16 lg:pt-[8vh]">
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
             key={step}
@@ -58,19 +59,20 @@ export function StepShell({ step, total, kicker, title, subtitle, direction, onB
             </Screen>
           </motion.div>
         </AnimatePresence>
-      </main>
 
-      <PinnedFooter>
-        {error && (
-          <p role="alert" className="mb-3 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3 py-2.5 text-sm text-fg">
-            <Alert className="mt-0.5 size-4 shrink-0 text-warn" />
-            {error}
-          </p>
-        )}
-        <Button size="lg" onClick={cta.onClick} disabled={cta.disabled}>
-          {cta.label}
-        </Button>
-      </PinnedFooter>
+        {/* Outside the animated (transformed) wrapper, so `fixed` still pins to the viewport on phones. */}
+        <PinnedFooter desktop="inline" className="lg:mt-8">
+          {error && (
+            <p role="alert" className="mb-3 flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3 py-2.5 text-sm text-fg">
+              <Alert className="mt-0.5 size-4 shrink-0 text-warn" />
+              {error}
+            </p>
+          )}
+          <Button size="lg" onClick={cta.onClick} disabled={cta.disabled}>
+            {cta.label}
+          </Button>
+        </PinnedFooter>
+      </main>
     </div>
   );
 }

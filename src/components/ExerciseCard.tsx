@@ -43,27 +43,36 @@ export function ExerciseCard({ index, info, prescription: p, done, onToggle, def
       </header>
 
       {info && (
-        <figure className="mx-auto mt-4" style={{ width: MEDIA_SIZE }}>
-          <div className="overflow-hidden rounded-xl bg-white" style={{ width: MEDIA_SIZE, height: MEDIA_SIZE }}>
-            {/* Plain <img> on purpose: next/image would resize Gym visual media (breaks the 180×180 terms). */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={mediaUrl(info.gif)}
-              alt={`${name} demonstration`}
-              width={MEDIA_SIZE}
-              height={MEDIA_SIZE}
-              loading={index < 2 ? "eager" : "lazy"}
-              decoding="async"
-              className="block"
-            />
-          </div>
-          <figcaption className="mt-1.5 text-center text-[11px] leading-4 text-muted">
-            © Gym visual —{" "}
-            <a href={GYM_VISUAL_URL} target="_blank" rel="noopener noreferrer" className="underline decoration-line underline-offset-2">
-              https://gymvisual.com/
-            </a>
-          </figcaption>
-        </figure>
+        // Desktop: GIF on the left, the steps beside it (always open). Phones: GIF centred, steps collapsible below.
+        <div className="mt-4 lg:grid lg:grid-cols-[180px_minmax(0,1fr)] lg:items-start lg:gap-5">
+          <figure className="mx-auto lg:mx-0" style={{ width: MEDIA_SIZE }}>
+            <div className="overflow-hidden rounded-xl bg-white" style={{ width: MEDIA_SIZE, height: MEDIA_SIZE }}>
+              {/* Plain <img> on purpose: next/image would resize Gym visual media (breaks the 180×180 terms). */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mediaUrl(info.gif)}
+                alt={`${name} demonstration`}
+                width={MEDIA_SIZE}
+                height={MEDIA_SIZE}
+                loading={index < 2 ? "eager" : "lazy"}
+                decoding="async"
+                className="block"
+              />
+            </div>
+            <figcaption className="mt-1.5 text-center text-[11px] leading-4 text-muted">
+              © Gym visual —{" "}
+              <a href={GYM_VISUAL_URL} target="_blank" rel="noopener noreferrer" className="underline decoration-line underline-offset-2">
+                https://gymvisual.com/
+              </a>
+            </figcaption>
+          </figure>
+          {info.steps.length > 0 && (
+            <div className="hidden lg:block">
+              <h3 className="text-sm font-medium text-fg">How to do it</h3>
+              <Steps steps={info.steps} className="mt-2" />
+            </div>
+          )}
+        </div>
       )}
 
       <dl className="mt-4 grid grid-cols-3 divide-x divide-line rounded-xl border border-line bg-raised text-center">
@@ -88,21 +97,27 @@ export function ExerciseCard({ index, info, prescription: p, done, onToggle, def
       </div>
 
       {info && info.steps.length > 0 && (
-        <details className="group mt-4 rounded-xl border border-line" open={defaultOpen}>
+        <details className="group mt-4 rounded-xl border border-line lg:hidden" open={defaultOpen}>
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium text-fg [&::-webkit-details-marker]:hidden">
             How to do it
             <ChevronRight className="size-4 rotate-90 text-muted transition-transform group-open:-rotate-90" />
           </summary>
-          <ol className="space-y-2 px-3 pb-3 text-sm leading-relaxed text-muted">
-            {info.steps.map((step, i) => (
-              <li key={i} className="flex gap-2.5">
-                <span className="font-display text-base leading-6 text-gold">{i + 1}</span>
-                <span>{step}</span>
-              </li>
-            ))}
-          </ol>
+          <Steps steps={info.steps} className="px-3 pb-3" />
         </details>
       )}
     </article>
+  );
+}
+
+function Steps({ steps, className = "" }: { steps: string[]; className?: string }) {
+  return (
+    <ol className={`space-y-2 text-sm leading-relaxed text-muted ${className}`}>
+      {steps.map((step, i) => (
+        <li key={i} className="flex gap-2.5">
+          <span className="font-display text-base leading-6 text-gold">{i + 1}</span>
+          <span>{step}</span>
+        </li>
+      ))}
+    </ol>
   );
 }

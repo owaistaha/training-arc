@@ -6,6 +6,7 @@ const EXTERNAL_URL = process.env.PLAYWRIGHT_BASE_URL;
 
 export default defineConfig({
   outputDir: "tests/.results",
+  globalSetup: "./tests/global-setup.ts",
   timeout: 240_000,
   expect: { timeout: 15_000 },
   workers: 1,

@@ -62,46 +62,56 @@ function WeekView({ plan, profile, log }: { plan: StoredPlan; profile: Profile |
   };
 
   return (
-    <div className="min-h-dvh pb-16 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <Screen>
-        <div className="flex items-center justify-between">
-          <Kicker>Your weekly plan</Kicker>
-          {plan.source === "ai" ? <Chip tone="electric">AI coach plan</Chip> : <Chip>Classic split</Chip>}
-        </div>
-        <h1 className="mt-2 font-display text-[2.75rem] leading-[0.95] tracking-wide">
-          {plan.plan.title.split(" — ")[0]}
-          {plan.plan.title.includes(" — ") && (
-            <>
-              <span className="sr-only"> — </span>
-              <span className="block text-2xl tracking-widest text-muted">{plan.plan.title.split(" — ")[1]}</span>
-            </>
+    <div className="min-h-dvh pb-16 pt-[max(1.5rem,env(safe-area-inset-top))] lg:pt-12">
+      {/*
+        Phones: one column (header → days → actions → credits).
+        Desktop: left panel (header, actions, credits) + days in a 2-column grid on the right.
+        The last row is 1fr so the tall days list doesn't push the panel's rows apart.
+      */}
+      <Screen
+        wide
+        className="lg:grid lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:grid-rows-[auto_auto_1fr] lg:items-start lg:gap-x-12"
+      >
+        <div className="lg:col-start-1 lg:row-start-1">
+          <div className="flex items-center justify-between">
+            <Kicker>Your weekly plan</Kicker>
+            {plan.source === "ai" ? <Chip tone="electric">AI coach plan</Chip> : <Chip>Classic split</Chip>}
+          </div>
+          <h1 className="mt-2 font-display text-[2.75rem] leading-[0.95] tracking-wide">
+            {plan.plan.title.split(" — ")[0]}
+            {plan.plan.title.includes(" — ") && (
+              <>
+                <span className="sr-only"> — </span>
+                <span className="block text-2xl tracking-widest text-muted">{plan.plan.title.split(" — ")[1]}</span>
+              </>
+            )}
+          </h1>
+
+          <dl className="mt-5 grid grid-cols-3 divide-x divide-line rounded-card border border-line bg-surface text-center">
+            {[
+              ["Calories", plan.stats.calories.toLocaleString("en-US"), "kcal"],
+              ["Protein", String(plan.stats.proteinG), "g"],
+              ["Training", String(plan.plan.days.length), "days"],
+            ].map(([label, n, unit]) => (
+              <div key={label} className="px-2 py-3">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</dt>
+                <dd className="mt-0.5 font-display text-3xl leading-none tracking-wide">
+                  {n}
+                  <span className="ml-1 font-sans text-xs font-normal tracking-normal text-muted">{unit}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          {plan.source === "template" && (
+            <p className="mt-3 text-xs leading-relaxed text-muted">
+              Our AI coach was busy, so this is a hand-built split using the same exercise pool. You can regenerate it
+              later.
+            </p>
           )}
-        </h1>
+        </div>
 
-        <dl className="mt-5 grid grid-cols-3 divide-x divide-line rounded-card border border-line bg-surface text-center">
-          {[
-            ["Calories", plan.stats.calories.toLocaleString("en-US"), "kcal"],
-            ["Protein", String(plan.stats.proteinG), "g"],
-            ["Training", String(plan.plan.days.length), "days"],
-          ].map(([label, n, unit]) => (
-            <div key={label} className="px-2 py-3">
-              <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</dt>
-              <dd className="mt-0.5 font-display text-3xl leading-none tracking-wide">
-                {n}
-                <span className="ml-1 font-sans text-xs font-normal tracking-normal text-muted">{unit}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
-
-        {plan.source === "template" && (
-          <p className="mt-3 text-xs leading-relaxed text-muted">
-            Our AI coach was busy, so this is a hand-built split using the same exercise pool. You can regenerate it
-            later.
-          </p>
-        )}
-
-        <ol className="mt-6 flex flex-col gap-3">
+        <ol className="mt-6 flex flex-col gap-3 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:mt-0 lg:grid lg:grid-cols-2 lg:gap-4">
           {plan.plan.days.map((day, i) => {
             const sets = day.exercises.reduce((n, e) => n + e.sets, 0);
             const dayLog = today[String(i)] ?? {};
@@ -114,7 +124,7 @@ function WeekView({ plan, profile, log }: { plan: StoredPlan; profile: Profile |
               <li key={i}>
                 <Link
                   href={`/plan/${i + 1}`}
-                  className={`group flex items-center gap-4 rounded-card border bg-surface p-4 transition-colors hover:border-muted/40 ${
+                  className={`group flex h-full items-center gap-4 rounded-card border bg-surface p-4 transition-colors hover:border-muted/40 ${
                     complete ? "border-electric/60" : "border-line"
                   }`}
                 >
@@ -150,7 +160,7 @@ function WeekView({ plan, profile, log }: { plan: StoredPlan; profile: Profile |
           })}
         </ol>
 
-        <div className="mt-8 flex flex-col gap-2">
+        <div className="mt-8 flex flex-col gap-2 lg:col-start-1 lg:row-start-2 lg:mt-6">
           {profile && (
             <Button variant="secondary" onClick={regenerate} disabled={busy} className="h-12 w-full">
               {busy ? <Spinner className="size-4" /> : <Refresh className="size-4" />}
@@ -166,7 +176,7 @@ function WeekView({ plan, profile, log }: { plan: StoredPlan; profile: Profile |
             {confirmRestart ? "Tap again to wipe everything and restart" : "Restart onboarding"}
           </Button>
         </div>
-        <SiteFooter className="mt-8" />
+        <SiteFooter className="mt-8 lg:col-start-1 lg:row-start-3 lg:mt-6 lg:text-left" />
       </Screen>
     </div>
   );

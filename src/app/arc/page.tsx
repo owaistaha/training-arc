@@ -58,13 +58,16 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
 
   return (
     <div className="min-h-dvh pb-36">
-      <Screen className="flex h-12 items-center pt-[env(safe-area-inset-top)]">
+      <Screen className="flex h-12 items-center pt-[env(safe-area-inset-top)] lg:mt-4 lg:max-w-5xl lg:px-10">
         <BackButton href="/onboarding" label="Back to questions" />
       </Screen>
-      <Screen>
+      <Screen className="lg:max-w-5xl lg:px-10">
         <Kicker>Choose your arc</Kicker>
-        <h1 className="mt-1 font-display text-[2.75rem] leading-[0.95] tracking-wide">Pick your arc</h1>
-        <p className="mt-1.5 text-[15px] leading-snug text-muted">Swipe the six archetypes. Tap your goal.</p>
+        <h1 className="mt-1 font-display text-[2.75rem] leading-[0.95] tracking-wide lg:text-6xl">Pick your arc</h1>
+        <p className="mt-1.5 text-[15px] leading-snug text-muted">
+          <span className="lg:hidden">Swipe the six archetypes. Tap your goal.</span>
+          <span className="hidden lg:inline">Six original archetypes. Pick the physique you&apos;re training toward.</span>
+        </p>
       </Screen>
 
       <div
@@ -72,7 +75,7 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         onScroll={onScroll}
         role="radiogroup"
         aria-label="Physique archetypes"
-        className="scrollbar-none mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[max(1.25rem,calc((100vw-300px)/2))] pb-4 pt-2 md:px-[calc((100vw-300px)/2)]"
+        className="scrollbar-none mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-[max(1.25rem,calc((100vw-300px)/2))] pb-4 pt-2 md:px-[calc((100vw-300px)/2)] lg:mx-auto lg:mt-6 lg:grid lg:max-w-5xl lg:snap-none lg:grid-cols-3 lg:gap-6 lg:overflow-visible lg:px-10"
       >
         {ARCHETYPES.map((a, i) => (
           <ArchetypeCard
@@ -86,7 +89,7 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         ))}
       </div>
 
-      <div data-arc-dots className="flex justify-center gap-2" aria-hidden>
+      <div data-arc-dots className="flex justify-center gap-2 lg:hidden" aria-hidden>
         {ARCHETYPES.map((a, i) => (
           <span
             key={a.id}
@@ -95,11 +98,12 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         ))}
       </div>
 
-      <PinnedFooter>
-        <Button size="lg" onClick={confirm} disabled={!selected}>
+      {/* Phones: pinned CTA. Desktop: a bottom bar with the credit on the left and the CTA on the right. */}
+      <PinnedFooter desktop="bar" className="lg:flex lg:flex-row-reverse lg:items-center lg:justify-between lg:gap-6">
+        <Button size="lg" onClick={confirm} disabled={!selected} className="lg:w-auto lg:min-w-80 lg:px-8">
           {chosen ? `This is my goal · ${chosen.name.replace(/^The /, "")}` : "Tap an archetype"}
         </Button>
-        <SiteFooter artOnly className="mt-2" />
+        <SiteFooter artOnly className="mt-2 lg:mt-0 lg:text-left" />
       </PinnedFooter>
     </div>
   );
