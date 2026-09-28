@@ -1,4 +1,9 @@
 {
+  "vanguard": {
+    "src": "/archetypes/vanguard.webp?v=e8363a39",
+    "width": 768,
+    "height": 1024
+  },
   "titan": {
     "src": "/archetypes/titan.webp?v=ffc16538",
     "width": 768,

@@ -221,6 +221,8 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await expect(warrior).toHaveAttribute("aria-checked", "true");
   await expectArcFitsAboveCta(page);
   await shot(page, "arc-picker-selected");
+  await page.locator('[data-archetype="vanguard"]').scrollIntoViewIfNeeded();
+  await shot(page, "arc-picker-vanguard");
   await page.getByRole("button", { name: /This is my goal/ }).click();
 
   // ---------- Reveal ----------
