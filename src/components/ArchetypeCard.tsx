@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ARCHETYPE_ART, type Archetype } from "@/lib/archetypes";
+import type { Archetype } from "@/lib/archetypes";
 import { DIRECTION_LABEL, SPLIT_LABEL } from "@/lib/labels";
 import { Check } from "./icons";
-import { Silhouette } from "./Silhouette";
+import { ArchetypeArt } from "./ArchetypeArt";
 import { Chip } from "./ui";
 
 interface ArchetypeCardProps {
@@ -14,34 +13,6 @@ interface ArchetypeCardProps {
   onSelect: () => void;
   /** e.g. "Built for the gym. At home we'll adapt it." */
   note?: string;
-}
-
-/**
- * Original archetype art (public/archetypes/<id>.webp, 768×1024) as a plain
- * <img>. Only archetypes listed in src/data/archetype-art.json request an
- * image; the rest, or any image that fails to load, show the SVG silhouette.
- */
-function ArchetypeArt({ archetype: a, eager }: { archetype: Archetype; eager: boolean }) {
-  const art = ARCHETYPE_ART[a.id];
-  const [failed, setFailed] = useState(false);
-
-  if (!art || failed) {
-    return <Silhouette archetype={a.id} className="absolute inset-x-0 top-2 h-[82%] w-full" />;
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- plain <img> on purpose: pre-sized WebP, no optimizer
-    <img
-      src={art.src}
-      alt={a.artAlt}
-      width={art.width}
-      height={art.height}
-      loading={eager ? "eager" : "lazy"}
-      decoding="async"
-      draggable={false}
-      onError={() => setFailed(true)}
-      className="absolute inset-0 h-full w-full object-cover"
-    />
-  );
 }
 
 /**
@@ -62,7 +33,12 @@ export function ArchetypeCard({ archetype: a, index, selected, onSelect, note }:
       }`}
     >
       <div className="relative aspect-[3/4] w-full bg-[radial-gradient(circle_at_50%_38%,var(--color-raised),var(--color-bg)_72%)]">
-        <ArchetypeArt archetype={a} eager={index < 2} />
+        <ArchetypeArt
+          archetype={a}
+          eager={index === 0}
+          className="absolute inset-0 h-full w-full object-cover"
+          fallbackClassName="absolute inset-x-0 top-2 h-[82%] w-full"
+        />
 
         <span className="absolute left-4 top-3 font-display text-xl tracking-widest text-muted">
           {String(index + 1).padStart(2, "0")}

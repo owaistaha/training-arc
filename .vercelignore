@@ -1,0 +1,14 @@
+# Keep local-only files out of `vercel deploy` uploads.
+# Secrets: the key lives in Vercel env vars, never in an upload.
+.env*
+!.env.example
+# Hand-generated source art (only public/archetypes/*.webp ships)
+art-raw/
+# Test and probe output
+tests/.results/
+tests/screenshots/
+playwright-report/
+scripts/probe-results.json
+# Build output / deps (Vercel builds from source)
+.next/
+node_modules/

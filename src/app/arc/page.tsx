@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArchetypeCard } from "@/components/ArchetypeCard";
+import { SiteFooter } from "@/components/SiteFooter";
 import { BackButton, Button, Kicker, LoadingScreen, PinnedFooter, Screen } from "@/components/ui";
 import { ARCHETYPES, type Archetype, type ArchetypeId } from "@/lib/archetypes";
 import { OnboardedProfileSchema, type OnboardedProfile } from "@/lib/planSchema";
@@ -85,7 +86,7 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         ))}
       </div>
 
-      <div className="flex justify-center gap-2" aria-hidden>
+      <div data-arc-dots className="flex justify-center gap-2" aria-hidden>
         {ARCHETYPES.map((a, i) => (
           <span
             key={a.id}
@@ -98,6 +99,7 @@ function ArcPicker({ profile }: { profile: OnboardedProfile }) {
         <Button size="lg" onClick={confirm} disabled={!selected}>
           {chosen ? `This is my goal · ${chosen.name.replace(/^The /, "")}` : "Tap an archetype"}
         </Button>
+        <SiteFooter artOnly className="mt-2" />
       </PinnedFooter>
     </div>
   );

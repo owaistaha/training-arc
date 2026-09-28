@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Check, ChevronRight, Refresh, Spinner } from "@/components/icons";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Button, Chip, Kicker, LoadingScreen, ProgressBar, Screen } from "@/components/ui";
 import { estimateMinutes } from "@/lib/labels";
 import { requestPlan, todayKey } from "@/lib/planClient";
@@ -165,6 +166,7 @@ function WeekView({ plan, profile, log }: { plan: StoredPlan; profile: Profile |
             {confirmRestart ? "Tap again to wipe everything and restart" : "Restart onboarding"}
           </Button>
         </div>
+        <SiteFooter className="mt-8" />
       </Screen>
     </div>
   );

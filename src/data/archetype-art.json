@@ -1,6 +1,16 @@
 {
+  "warrior": {
+    "src": "/archetypes/warrior.webp?v=f1c0b2a9",
+    "width": 768,
+    "height": 1024
+  },
   "vanguard": {
     "src": "/archetypes/vanguard.webp?v=e8363a39",
+    "width": 768,
+    "height": 1024
+  },
+  "ninja": {
+    "src": "/archetypes/ninja.webp?v=19374137",
     "width": 768,
     "height": 1024
   },

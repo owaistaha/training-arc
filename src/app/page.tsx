@@ -1,30 +1,29 @@
 "use client";
 
-import { Silhouette } from "@/components/Silhouette";
+import { ArchetypeArt } from "@/components/ArchetypeArt";
+import { SiteFooter } from "@/components/SiteFooter";
 import { ButtonLink, PinnedFooter, Screen } from "@/components/ui";
+import { getArchetype } from "@/lib/archetypes";
 import { StoredPlanSchema } from "@/lib/planSchema";
 import { KEYS } from "@/lib/storage";
 import { useStored } from "@/lib/useStored";
+
+// Soft radial mask so each image's background rectangle melts into the page.
+const MASK = "[mask-image:radial-gradient(ellipse_52%_60%_at_50%_42%,black_55%,transparent_100%)]";
 
 export default function Home() {
   const { value: plan } = useStored(KEYS.plan, StoredPlanSchema);
 
   return (
-    <div className="relative min-h-dvh overflow-x-clip">
+    <div className="relative flex min-h-dvh flex-col overflow-x-clip">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(ellipse_at_50%_20%,color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_65%)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[460px] bg-[radial-gradient(ellipse_at_50%_75%,color-mix(in_srgb,var(--color-accent)_18%,transparent),transparent_65%)]"
       />
-      <Screen className="relative pb-44 pt-[max(2rem,env(safe-area-inset-top))]">
+
+      <Screen className="relative pt-[max(2rem,env(safe-area-inset-top))]">
         <p className="font-display text-lg tracking-[0.3em] text-muted">Training Arc</p>
-
-        <div className="relative mx-auto mt-6 flex h-64 items-end justify-center" aria-hidden>
-          <Silhouette archetype="ninja" className="absolute -left-2 bottom-0 h-52 opacity-50" />
-          <Silhouette archetype="titan" className="absolute -right-2 bottom-0 h-52 opacity-50" />
-          <Silhouette archetype="warrior" className="relative h-64" />
-        </div>
-
-        <h1 className="mt-6 font-display text-[3.5rem] leading-[0.9] tracking-wide">
+        <h1 className="mt-5 font-display text-[3.5rem] leading-[0.9] tracking-wide">
           Pick the physique.
           <br />
           <span className="text-power">Start your arc.</span>
@@ -34,7 +33,7 @@ export default function Home() {
           1,300+ exercises, each with a demo GIF.
         </p>
 
-        <ul className="mt-6 grid grid-cols-3 gap-2 text-center">
+        <ul className="mt-5 grid grid-cols-3 gap-2 text-center">
           {[
             ["6", "archetypes"],
             ["1,324", "exercises"],
@@ -46,8 +45,30 @@ export default function Home() {
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-center text-xs text-muted">Free · no account · saved on this device only</p>
+        <p className="mt-3 text-center text-xs text-muted">Free · no account · saved on this device only</p>
       </Screen>
+
+      {/* Character strip: sits at the bottom, behind the pinned CTA. Decorative. */}
+      <div aria-hidden data-landing-art className="relative mx-auto mt-2 w-full max-w-md flex-1" style={{ minHeight: 300 }}>
+        <div className="absolute inset-x-0 bottom-0 h-[320px]">
+          <ArchetypeArt
+            archetype={getArchetype("ninja")}
+            decorative
+            className={`absolute bottom-10 left-[-9%] h-[74%] w-auto opacity-70 ${MASK}`}
+          />
+          <ArchetypeArt
+            archetype={getArchetype("titan")}
+            decorative
+            className={`absolute bottom-10 right-[-9%] h-[74%] w-auto opacity-70 ${MASK}`}
+          />
+          <ArchetypeArt
+            archetype={getArchetype("warrior")}
+            decorative
+            eager
+            className={`absolute bottom-0 left-1/2 h-full w-auto -translate-x-1/2 ${MASK}`}
+          />
+        </div>
+      </div>
 
       <PinnedFooter>
         {plan ? (
@@ -64,6 +85,7 @@ export default function Home() {
             Start your arc
           </ButtonLink>
         )}
+        <SiteFooter className="mt-3" />
       </PinnedFooter>
     </div>
   );

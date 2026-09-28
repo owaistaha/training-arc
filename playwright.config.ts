@@ -1,6 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
 const PORT = 3217;
+// Set PLAYWRIGHT_BASE_URL to test a deployed site (e.g. a Vercel URL) instead of a local build.
+const EXTERNAL_URL = process.env.PLAYWRIGHT_BASE_URL;
 
 export default defineConfig({
   outputDir: "tests/.results",
@@ -9,7 +11,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: EXTERNAL_URL ?? `http://localhost:${PORT}`,
     // Mobile-first: 375 px base viewport.
     viewport: { width: 375, height: 812 },
     deviceScaleFactor: 2,
@@ -23,11 +25,13 @@ export default defineConfig({
     // Real Gemini, uses free-tier quota: `npm run test:live`.
     { name: "live", testDir: "tests/live" },
   ],
-  webServer: {
-    // Production build (skips the dataset re-download; exercises.slim.json must exist — run `npm run slim` once).
-    command: `npx next build && npx next start -p ${PORT}`,
-    url: `http://localhost:${PORT}`,
-    timeout: 240_000,
-    reuseExistingServer: false,
-  },
+  webServer: EXTERNAL_URL
+    ? undefined
+    : {
+        // Production build (skips the dataset re-download; exercises.slim.json must exist — run `npm run slim` once).
+        command: `npx next build && npx next start -p ${PORT}`,
+        url: `http://localhost:${PORT}`,
+        timeout: 240_000,
+        reuseExistingServer: false,
+      },
 });

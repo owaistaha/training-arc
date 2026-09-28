@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { ExerciseCard } from "@/components/ExerciseCard";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Check } from "@/components/icons";
 import { BackButton, ButtonLink, Kicker, LoadingScreen, ProgressBar, Screen } from "@/components/ui";
 import { estimateMinutes } from "@/lib/labels";
@@ -104,6 +105,7 @@ function Workout({ plan, dayIndex, log }: { plan: StoredPlan; dayIndex: number; 
             </ButtonLink>
           )}
         </nav>
+        <SiteFooter className="mt-8" />
       </Screen>
     </div>
   );

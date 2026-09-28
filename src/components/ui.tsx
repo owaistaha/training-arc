@@ -52,7 +52,7 @@ export function Screen({ children, className = "" }: { children: ReactNode; clas
 /** CTA pinned to the bottom of the viewport, above the safe area. */
 export function PinnedFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg from-60% to-transparent pt-10">
+    <div data-pinned-footer className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg from-60% to-transparent pt-8">
       <div className="pointer-events-auto mx-auto w-full max-w-md px-5 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {children}
       </div>

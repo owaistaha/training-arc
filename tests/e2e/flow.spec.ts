@@ -34,7 +34,7 @@ async function expectTapTargets(page: Page) {
   const offenders = await page.evaluate(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>("button, [role=radio], a, summary"));
     return els
-      .filter((el) => !el.closest("figcaption") && el.offsetParent !== null)
+      .filter((el) => !el.closest("figcaption, footer") && el.offsetParent !== null) // inline text links are exempt
       .map((el) => {
         const r = el.getBoundingClientRect();
         return { text: (el.getAttribute("aria-label") || el.textContent || "").trim().slice(0, 40), w: Math.round(r.width), h: Math.round(r.height) };
@@ -58,8 +58,12 @@ async function expectArcFitsAboveCta(page: Page) {
   expect(art!.width).toBeGreaterThanOrEqual(296);
   expect(art!.width).toBeLessThanOrEqual(300);
   expect(Math.abs(art!.height - (art!.width * 4) / 3)).toBeLessThanOrEqual(1);
-  // 16 px clearance for the footer's fade-out gradient.
   expect(card!.y + card!.height, "card is covered by the CTA").toBeLessThanOrEqual(cta!.y - 16);
+  // Nothing (card or page dots) may sit under the pinned footer's fade-out either.
+  const fade = await page.locator("[data-pinned-footer]").boundingBox();
+  const dots = await page.locator("[data-arc-dots]").boundingBox();
+  expect(card!.y + card!.height, "card is under the footer fade").toBeLessThanOrEqual(fade!.y);
+  expect(dots!.y + dots!.height, "page dots are under the footer fade").toBeLessThanOrEqual(fade!.y);
 }
 
 /** Every card shows its WebP art if the manifest lists it (loaded, 768×1024, alt from archetypes.json), else the silhouette. */
@@ -81,6 +85,31 @@ async function expectArchetypeArt(page: Page) {
     }
   }
   await page.locator(`[data-archetype="${ARCHETYPES[0].id}"]`).scrollIntoViewIfNeeded();
+}
+
+const ART_CREDIT = "Art: original characters generated with Google Gemini";
+
+/** Both credits are in the site footer. */
+async function expectCredits(page: Page) {
+  const footer = page.locator("footer");
+  await expect(footer).toContainText("© Gym visual — https://gymvisual.com/");
+  await expect(footer).toContainText(ART_CREDIT);
+}
+
+/** Landing strip: 3 WebP characters, only the first visible one eager, all loaded, sitting behind the pinned CTA. */
+async function expectLandingArt(page: Page) {
+  const imgs = page.locator("[data-landing-art] img");
+  await expect(imgs).toHaveCount(3);
+  const loading = await imgs.evaluateAll((els) => els.map((el) => (el as HTMLImageElement).loading));
+  expect(loading.filter((l) => l === "eager")).toHaveLength(1);
+  expect(loading.filter((l) => l === "lazy")).toHaveLength(2);
+  for (let i = 0; i < 3; i++) {
+    await expect.poll(() => imgs.nth(i).evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth), { timeout: 10_000 }).toBe(768);
+  }
+  const strip = await page.locator("[data-landing-art]").boundingBox();
+  const cta = await page.getByRole("link", { name: /Start your arc|Continue your arc/ }).boundingBox();
+  expect(cta!.y, "CTA should overlap the character strip").toBeLessThan(strip!.y + strip!.height);
+  expect(cta!.y, "characters' upper bodies stay visible above the CTA").toBeGreaterThan(strip!.y + 120);
 }
 
 async function continueTo(page: Page, nextTitle: string | RegExp) {
@@ -114,6 +143,8 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Pick the physique");
   await checkScreen(page);
+  await expectLandingArt(page);
+  await expectCredits(page);
   await shot(page, "landing");
 
   // ---------- Onboarding ----------
@@ -252,6 +283,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
   expect(dayCount).toBe(4);
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("ta.plan.v1") || "null"));
   expect(stored.plan).toEqual(PLAN_FIXTURE.plan);
+  await expectCredits(page);
   await checkScreen(page);
   await shot(page, "plan-week", true);
 
@@ -266,6 +298,7 @@ test("full flow at 375 px: onboarding → arc → reveal → plan → workout", 
     return !!img && img.complete && img.naturalWidth > 0;
   });
   await expect(page.getByText("© Gym visual —").first()).toBeVisible();
+  await expectCredits(page);
   await checkScreen(page);
   await shot(page, "workout-day");
 
