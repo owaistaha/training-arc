@@ -118,7 +118,7 @@ A separate `npm run test:live` calls the real Gemini API through the deployed si
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Browser<br/>onboarding + archetype"] -->|"profile only<br/>(strict schema)"| B["POST /api/plan"]
     B --> C["stats.ts<br/>calories · protein"]
     B --> D["candidates.ts<br/>~80 of 1,324 exercises"]
