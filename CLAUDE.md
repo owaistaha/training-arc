@@ -7,7 +7,7 @@ of 6 **original** anime-style physique archetypes. The app computes
 calorie and protein targets in code, and Gemini (free tier) builds a
 weekly plan using only exercises from `hasaneyldrm/exercises-dataset`.
 Each exercise has a demo GIF and steps. Everything is saved in
-localStorage. That's the whole v1. Read PRD.md and TECH_SPEC.md first.
+localStorage. That's the whole v1. Read docs/PRD.md and docs/TECH_SPEC.md first.
 
 ## Stack
 Next.js 16 (App Router, TS, Tailwind) · `@google/genai` · `zod` ·
@@ -32,7 +32,7 @@ once logged in.
    then copy in these docs plus `.env.example` and `archetypes.json`
    (goes to `src/data/`)
 2. `npm i @google/genai zod framer-motion`
-3. Write `scripts/slim-dataset.mjs` (see TECH_SPEC.md), wire it up as
+3. Write `scripts/slim-dataset.mjs` (see docs/TECH_SPEC.md), wire it up as
    `prebuild` and `predev`, run it, and **check that the output is under
    3 MB and has 1,324 records**
 4. **Check the model:** call `models.list` with the key and confirm

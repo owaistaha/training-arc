@@ -14,7 +14,8 @@
     "test:e2e": "playwright test --project=e2e",
     "test:live": "playwright test --project=live",
     "fixture": "tsx scripts/make-fixture.ts",
-    "art": "node scripts/convert-art.mjs"
+    "art": "node scripts/convert-art.mjs",
+    "readme:shots": "node scripts/readme-shots.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
