@@ -12,18 +12,18 @@ export default function Home() {
   const { value: plan } = useStored(KEYS.plan, StoredPlanSchema);
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-x-clip">
+    <div className="relative flex min-h-dvh flex-col overflow-x-clip lg:min-h-[calc(100dvh-4rem)]">
       {/* Phones: warm glow behind the character strip. Desktop: glow behind the roster. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[460px] bg-[radial-gradient(ellipse_at_50%_75%,color-mix(in_srgb,var(--color-accent)_18%,transparent),transparent_65%)] lg:inset-y-0 lg:left-auto lg:right-0 lg:h-auto lg:w-3/5 lg:bg-[radial-gradient(ellipse_at_55%_50%,color-mix(in_srgb,var(--color-accent)_14%,transparent),transparent_65%)]"
       />
 
-      <div className="relative flex flex-1 flex-col lg:mx-auto lg:grid lg:w-full lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-16 lg:px-10 lg:py-12">
+      <div className="relative flex flex-1 flex-col lg:mx-auto lg:grid lg:w-full lg:max-w-6xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-16 lg:px-10 lg:py-10">
         <div>
           <Screen className="relative pt-[max(2rem,env(safe-area-inset-top))] lg:mx-0 lg:max-w-xl lg:px-0 lg:pt-0">
-            <p className="font-display text-lg tracking-[0.3em] text-muted">Training Arc</p>
-            <h1 className="mt-5 font-display text-[3.5rem] leading-[0.9] tracking-wide lg:text-[5.5rem]">
+            <p className="font-display text-lg tracking-[0.3em] text-muted lg:hidden">Training Arc</p>
+            <h1 className="mt-5 lg:mt-0 font-display text-[3.5rem] leading-[0.9] tracking-wide lg:text-[5.5rem]">
               Pick the physique.
               <br />
               <span className="text-power">Start your arc.</span>

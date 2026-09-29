@@ -4,7 +4,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import ART_MANIFEST from "../../src/data/archetype-art.json";
 import ARCHETYPES from "../../src/data/archetypes.json";
-import { mockPlanApi } from "./mockPlan";
+import { mockPlanApi, PLAN_FIXTURE } from "./mockPlan";
 
 const SHOTS = join(__dirname, "..", "screenshots");
 mkdirSync(SHOTS, { recursive: true }); // emptied once per run by tests/global-setup.ts
@@ -73,6 +73,8 @@ test.describe("desktop 1440×900", () => {
     expect(ctaBox.y - (stats.y + stats.height), "CTA follows the stats closely").toBeLessThan(120);
     expect(ctaBox.y + ctaBox.height, "CTA visible without scrolling").toBeLessThanOrEqual(900);
 
+    await expect(page.locator("[data-site-header]"), "desktop site header").toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link"), "no nav links before onboarding").toHaveCount(0);
     await expect(page.locator("[data-landing-art]"), "phone strip is hidden").toBeHidden();
     const roster = page.locator("[data-landing-roster] img");
     await expect(roster).toHaveCount(Object.keys(ART_MANIFEST).length);
@@ -169,23 +171,50 @@ test.describe("desktop 1440×900", () => {
     await shot(page, "desktop-reveal");
     await seePlan.click();
 
-    // ---------- Week plan: side panel + days in two columns ----------
+    // ---------- Week plan: header band + the whole week, each day listing its exercises ----------
     await expect(page).toHaveURL(/\/plan$/);
     const planH1 = page.getByRole("heading", { level: 1, name: /Warrior Arc/ });
     await expect(planH1).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "My plan" })).toHaveAttribute("aria-current", "page");
     const days = page.locator('a[href^="/plan/"]');
     await expect(days).toHaveCount(4);
-    const d = await Promise.all([0, 1, 2].map((i) => box(days.nth(i))));
-    expect(Math.abs(d[0].y - d[1].y), "days 1–2 share a row").toBeLessThanOrEqual(1);
-    expect(d[2].y).toBeGreaterThan(d[0].y + d[0].height - 1);
+    const d = await Promise.all([0, 1, 2, 3].map((i) => box(days.nth(i))));
+    for (const b of d) expect(Math.abs(b.y - d[0].y), "at 1440 px all four days share one row").toBeLessThanOrEqual(1);
     const planH1Box = await box(planH1);
-    expect(d[0].x, "days are right of the side panel").toBeGreaterThan(planH1Box.x + 300);
+    expect(d[0].y, "the week sits under the header band").toBeGreaterThan(planH1Box.y + planH1Box.height);
     const regen = await box(page.getByRole("button", { name: "Regenerate plan" }));
-    expect(regen.x + regen.width, "actions sit in the side panel").toBeLessThan(d[0].x);
-    expect(regen.y + regen.height, "actions visible without scrolling").toBeLessThanOrEqual(900);
+    expect(regen.x, "actions sit at the right of the header band").toBeGreaterThan(planH1Box.x + planH1Box.width);
+    expect(regen.y + regen.height).toBeLessThan(d[0].y);
+    const fixtureDays = PLAN_FIXTURE.plan.days;
+    for (let i = 0; i < fixtureDays.length; i++) {
+      const list = days.nth(i).locator("[data-day-exercises] li");
+      await expect(list, `day ${i + 1} lists its exercises`).toHaveCount(fixtureDays[i].exercises.length);
+      const first = fixtureDays[i].exercises[0];
+      await expect(list.first()).toContainText(`${first.sets} × ${first.reps}`);
+      await expect(list.first()).toContainText(new RegExp(PLAN_FIXTURE.exercises[first.exerciseId as keyof typeof PLAN_FIXTURE.exercises].name, "i"));
+    }
+    const clipped = await days.evaluateAll((els) =>
+      els.flatMap((a) => Array.from(a.querySelectorAll<HTMLElement>("span")).filter((s) => s.scrollWidth > s.clientWidth + 1).map((s) => s.textContent)),
+    );
+    expect(clipped, "no truncated text in the day cards").toEqual([]);
+    const lastDay = d[3];
+    expect(lastDay.y + lastDay.height, "the whole week fits the first screen at 1440×900").toBeLessThanOrEqual(900);
     await expectNoHorizontalScroll(page);
     await expectTapTargets(page);
     await shot(page, "desktop-plan-week");
+
+    // Narrower desktop (1024 px): two columns, still no horizontal scroll.
+    await page.setViewportSize({ width: 1024, height: 768 });
+    const n = await Promise.all([0, 1, 2].map((i) => box(days.nth(i))));
+    expect(Math.abs(n[0].y - n[1].y), "1024 px: days 1–2 share a row").toBeLessThanOrEqual(1);
+    expect(n[2].y).toBeGreaterThan(n[0].y + n[0].height - 1);
+    await expectNoHorizontalScroll(page);
+    await shot(page, "desktop-1024-plan-week");
+    // Roughly a 14" laptop browser window.
+    await page.setViewportSize({ width: 1390, height: 690 });
+    await expectNoHorizontalScroll(page);
+    await shot(page, "desktop-1390-plan-week");
+    await page.setViewportSize({ width: 1440, height: 900 });
 
     // ---------- Workout day: cards in two columns, GIF beside the steps ----------
     await days.first().click();
@@ -225,6 +254,7 @@ test.describe("tablet 768×1024", () => {
     await page.goto("/");
     await expect(page.locator("[data-landing-art]")).toBeVisible();
     await expect(page.locator("[data-landing-roster]")).toBeHidden();
+    await expect(page.locator("[data-site-header]"), "no site header below 1024 px").toBeHidden();
     expect(await footerPosition(page)).toBe("fixed");
     await expectNoHorizontalScroll(page);
     await shot(page, "tablet-landing");

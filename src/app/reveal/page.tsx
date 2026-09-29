@@ -53,7 +53,7 @@ function Reveal({ profile }: { profile: Profile }) {
   const building = !planReady && !error;
 
   return (
-    <div className={`min-h-dvh ${error ? "pb-72" : "pb-48"} lg:pb-16`}>
+    <div className={`min-h-dvh ${error ? "pb-72" : "pb-48"} lg:min-h-0 lg:pb-16`}>
       <Screen wide className="flex h-14 items-center pt-[env(safe-area-inset-top)] lg:mt-4">
         <BackButton href="/arc" label="Back to archetypes" />
       </Screen>

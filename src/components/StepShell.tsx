@@ -28,7 +28,7 @@ const variants = {
 /** One-question-per-screen frame: back button, progress bar, animated question, pinned CTA. */
 export function StepShell({ step, total, kicker, title, subtitle, direction, onBack, cta, error, children }: StepShellProps) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col lg:min-h-[calc(100dvh-4rem)]">
       <header className="sticky top-0 z-10 bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <Screen className="flex h-14 items-center gap-3">
           <BackButton onClick={onBack} label="Previous question" />
